@@ -203,7 +203,7 @@ const char HTTP_INFO_autoconx[]   PROGMEM = "<dt>Autoconnect</dt><dd>{1}</dd>";
 const char HTTP_INFO_calibration[] PROGMEM = "<div class='msg'><h3 style=\"text-align:center\">Instructions for scale calibration</h3>  <ol><li>Remove all weight from the scale</li><li>Enter calibration mass in grams, press enter.</li><li>Place mass on scale, weight 5 seconds.</li></ol>Your scale is calibrated! <br> You can go back to the main menu.</div>"
 ;
 
-const char S_brand[]              PROGMEM = "WiFiManager";
+const char S_brand[]              PROGMEM = "Beakbook Scale Registration";
 const char S_debugPrefix[]        PROGMEM = "*wm:";
 const char S_y[]                  PROGMEM = "Yes";
 const char S_n[]                  PROGMEM = "No";
