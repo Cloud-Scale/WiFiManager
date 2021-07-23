@@ -75,7 +75,7 @@ const char HTTP_STATUS_OFF[]       PROGMEM = "<div class='msg {c}'><strong>Not C
 const char HTTP_STATUS_OFFPW[]     PROGMEM = "<br/>Authentication Failure"; // STATION_WRONG_PASSWORD,  no eps32
 const char HTTP_STATUS_OFFNOAP[]   PROGMEM = "<br/>AP not found";   // WL_NO_SSID_AVAIL
 const char HTTP_STATUS_OFFFAIL[]   PROGMEM = "<br/>Could not Connect"; // WL_CONNECT_FAILED
-const char HTTP_STATUS_NONE[]      PROGMEM = "<div class='msg'>No AP set</div>";
+const char HTTP_STATUS_NONE[]      PROGMEM = "<div class='msg'>Wifi credentials not set.</div>";
 const char HTTP_BR[]               PROGMEM = "<br/>";
 
 const char HTTP_STYLE[]            PROGMEM = "<style>"
@@ -288,7 +288,7 @@ const char S_dns[]                PROGMEM = "dns";
 #ifdef ESP8266
 	const char S_ssidpre[]        PROGMEM = "ESP";
 #elif defined(ESP32)
-	const char S_ssidpre[]        PROGMEM = "ESP32";
+	const char S_ssidpre[]        PROGMEM = "BKB";
 #else
 	const char S_ssidpre[]        PROGMEM = "WM";
 #endif
