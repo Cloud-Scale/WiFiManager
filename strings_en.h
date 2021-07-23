@@ -64,7 +64,7 @@ const char HTTP_FORM_PARAM[]       PROGMEM = "<br/><input id='{i}' name='{n}' ma
 
 const char HTTP_SCAN_LINK[]        PROGMEM = "<br/><form action='/wifi?refresh=1' method='POST'><button name='refresh' value='1'>Refresh</button></form>";
 const char HTTP_SAVED[]            PROGMEM = "<div class='msg'>Saving Credentials<br/>Trying to connect ESP to network.<br />If it fails reconnect to AP to try again</div>";
-const char HTTP_PARAMSAVED[]       PROGMEM = "<div class='msg S'>Saved<br/></div>";
+const char HTTP_PARAMSAVED[]       PROGMEM = "<div class='msg S'><h3 style=\"text-align:center\">Calibration mass saved!</h3>Place the mass on the scale, and wait for 5 seconds.<br/> <br/><i> Once done, you can go back to the main menu.<i/></div>";
 const char HTTP_END[]              PROGMEM = "</div></body></html>";
 const char HTTP_ERASEBTN[]         PROGMEM = "<br/><form action='/erase' method='get'><button class='D'>Erase WiFi Config</button></form>";
 const char HTTP_UPDATEBTN[]        PROGMEM = "<br/><form action='/update' method='get'><button>Update</button></form>";
@@ -132,8 +132,7 @@ const char HTTP_HELP[]             PROGMEM =
  "<td>Reboot the device</td></tr>"
  "<tr><td>/erase</td>"
  "<td>Erase WiFi configuration and reboot Device. Device will not reconnect to a network until new WiFi configuration data is entered.</td></tr>"
- "</table>"
- "<p/>More information about WiFiManager at <a href='https://github.com/tzapu/WiFiManager'>https://github.com/tzapu/WiFiManager</a>.";
+ "</table>";
 #else
 const char HTTP_HELP[]             PROGMEM = "";
 #endif
@@ -201,7 +200,8 @@ const char HTTP_INFO_host[]       PROGMEM = "<dt>Hostname</dt><dd>{1}</dd>";
 const char HTTP_INFO_stamac[]     PROGMEM = "<dt>Station MAC</dt><dd>{1}</dd>";
 const char HTTP_INFO_conx[]       PROGMEM = "<dt>Connected</dt><dd>{1}</dd>";
 const char HTTP_INFO_autoconx[]   PROGMEM = "<dt>Autoconnect</dt><dd>{1}</dd>";
-
+const char HTTP_INFO_calibration[] PROGMEM = "<div class='msg'><h3 style=\"text-align:center\">Instructions for scale calibration</h3>  <ol><li>Remove all weight from the scale</li><li>Enter calibration mass in grams, press enter.</li><li>Place mass on scale, weight 5 seconds.</li></ol>Your scale is calibrated! <br> You can go back to the main menu.</div>"
+;
 
 const char S_brand[]              PROGMEM = "WiFiManager";
 const char S_debugPrefix[]        PROGMEM = "*wm:";
