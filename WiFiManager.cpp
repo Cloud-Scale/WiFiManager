@@ -1711,7 +1711,7 @@ void WiFiManager::handleWifiSave() {
 
   if(_ssid == ""){
     page = getHTTPHead(FPSTR(S_titlewifisettings)); // @token titleparamsaved
-    page += FPSTR(HTTP_PARAMSAVED);
+    page += FPSTR(HTTP_SAVED);
   }
   else {
     page = getHTTPHead(FPSTR(S_titlewifisaved)); // @token titlewifisaved
