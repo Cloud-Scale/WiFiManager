@@ -7,7 +7,7 @@
 #define TRIGGER_PIN 0
 
 WiFiManager wm; // global wm instance
-WiFiManagerParameter custom_field; // global param ( for non blocking w params )
+WiFiManagerParameter calibration_weight; // global param ( for non blocking w params )
 
 void setup() {
   WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP  
@@ -24,16 +24,16 @@ void setup() {
   int customFieldLength = 40;
 
 
-  // new (&custom_field) WiFiManagerParameter("customfieldid", "Custom Field Label", "Custom Field Value", customFieldLength,"placeholder=\"Custom Field Placeholder\"");
+  // new (&calibration_weight) WiFiManagerParameter("customfieldid", "Custom Field Label", "Custom Field Value", customFieldLength,"placeholder=\"Custom Field Placeholder\"");
   
   // test custom html input type(checkbox)
-  // new (&custom_field) WiFiManagerParameter("customfieldid", "Custom Field Label", "Custom Field Value", customFieldLength,"placeholder=\"Custom Field Placeholder\" type=\"checkbox\""); // custom html type
+  // new (&calibration_weight) WiFiManagerParameter("customfieldid", "Custom Field Label", "Custom Field Value", customFieldLength,"placeholder=\"Custom Field Placeholder\" type=\"checkbox\""); // custom html type
   
   // test custom html(radio)
   const char* custom_radio_str = "<br/><label for='customfieldid'>Custom Field Label</label><input type='radio' name='customfieldid' value='1' checked> One<br><input type='radio' name='customfieldid' value='2'> Two<br><input type='radio' name='customfieldid' value='3'> Three";
-  new (&custom_field) WiFiManagerParameter(custom_radio_str); // custom html input
+  new (&calibration_weight) WiFiManagerParameter(custom_radio_str); // custom html input
   
-  wm.addParameter(&custom_field);
+  wm.addParameter(&calibration_weight);
   wm.setSaveParamsCallback(saveParamCallback);
 
   // custom menu via array or vector
