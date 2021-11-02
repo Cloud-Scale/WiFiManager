@@ -2979,8 +2979,9 @@ bool WiFiManager::getWiFiIsSaved(){
 }
 
 String WiFiManager::getDefaultAPName(){
-  String hostString = String(WIFI_getChipId(),HEX);
-  hostString.toUpperCase();
+  String hostString = String(WiFi.macAddress());
+  hostString.toLowerCase();
+  hostString.replace(":",".");
   // char hostString[16] = {0};
   // sprintf(hostString, "%06X", ESP.getChipId());  
   return _wifissidprefix + "_" + hostString;
