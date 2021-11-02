@@ -332,11 +332,6 @@ boolean WiFiManager::autoConnect(char const *apName, char const *apPassword) {
       return true; // connected success
     }
 
-    // possibly skip the config portal
-    if (!_enableConfigPortal) {
-      return false; // not connected and not cp
-    }
-
     #ifdef WM_DEBUG_LEVEL
     DEBUG_WM(F("AutoConnect: FAILED"));
     #endif
@@ -346,6 +341,15 @@ boolean WiFiManager::autoConnect(char const *apName, char const *apPassword) {
     DEBUG_WM(F("No Credentials are Saved, skipping connect"));
     #endif
   } 
+
+  // possibly skip the config portal
+  if (!_enableConfigPortal) {
+    #ifdef WM_DEBUG_LEVEL
+    DEBUG_WM(DEBUG_VERBOSE,F("enableConfigPortal: FALSE, skipping "));
+    #endif
+
+    return false; // not connected and not cp
+  }
 
   // not connected start configportal
   bool res = startConfigPortal(apName, apPassword);
@@ -2103,7 +2107,8 @@ String WiFiManager::getInfoData(String id){
     p = FPSTR(HTTP_INFO_temp);
     p.replace(FPSTR(T_1),(String)temperatureRead());
     p.replace(FPSTR(T_2),(String)((temperatureRead()+32)*1.8));
-    p.replace(FPSTR(T_3),(String)hallRead());
+    // p.replace(FPSTR(T_3),(String)hallRead());
+    p.replace(FPSTR(T_3),"NA");
   }
   #endif
   return p;
@@ -2627,6 +2632,15 @@ void WiFiManager::setSaveParamsCallback( std::function<void()> func ) {
  */
 void WiFiManager::setPreSaveConfigCallback( std::function<void()> func ) {
   _presavecallback = func;
+}
+
+/**
+ * setPreOtaUpdateCallback, set a callback to fire before OTA update
+ * @access public
+ * @param {[type]} void (*func)(void)
+ */
+void WiFiManager::setPreOtaUpdateCallback( std::function<void()> func ) {
+  _preotaupdatecallback = func;
 }
 
 /**
@@ -3489,7 +3503,14 @@ String WiFiManager::WiFi_psk(bool persistent) const {
 }
 
 #ifdef ESP32
-void WiFiManager::WiFiEvent(WiFiEvent_t event,system_event_info_t info){
+  #ifdef WM_ARDUINOEVENTS
+  void WiFiManager::WiFiEvent(WiFiEvent_t event,arduino_event_info_t info){
+  #else
+  void WiFiManager::WiFiEvent(WiFiEvent_t event,system_event_info_t info){
+    #define wifi_sta_disconnected disconnected
+    #define ARDUINO_EVENT_WIFI_STA_DISCONNECTED SYSTEM_EVENT_STA_DISCONNECTED
+    #define ARDUINO_EVENT_WIFI_SCAN_DONE SYSTEM_EVENT_SCAN_DONE
+  #endif
     if(!_hasBegun){
       #ifdef WM_DEBUG_LEVEL
         // DEBUG_WM(DEBUG_VERBOSE,"[ERROR] WiFiEvent, not ready");
@@ -3502,15 +3523,15 @@ void WiFiManager::WiFiEvent(WiFiEvent_t event,system_event_info_t info){
     #ifdef WM_DEBUG_LEVEL
     // DEBUG_WM(DEBUG_VERBOSE,"[EVENT]",event);
     #endif
-    if(event == SYSTEM_EVENT_STA_DISCONNECTED){
+    if(event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED){
     #ifdef WM_DEBUG_LEVEL
-      DEBUG_WM(DEBUG_VERBOSE,F("[EVENT] WIFI_REASON: "),info.disconnected.reason);
+      DEBUG_WM(DEBUG_VERBOSE,F("[EVENT] WIFI_REASON: "),info.wifi_sta_disconnected.reason);
       #endif
-      if(info.disconnected.reason == WIFI_REASON_AUTH_EXPIRE || info.disconnected.reason == WIFI_REASON_AUTH_FAIL){
+      if(info.wifi_sta_disconnected.reason == WIFI_REASON_AUTH_EXPIRE || info.wifi_sta_disconnected.reason == WIFI_REASON_AUTH_FAIL){
         _lastconxresulttmp = 7; // hack in wrong password internally, sdk emit WIFI_REASON_AUTH_EXPIRE on some routers on auth_fail
       } else _lastconxresulttmp = WiFi.status();
       #ifdef WM_DEBUG_LEVEL
-      if(info.disconnected.reason == WIFI_REASON_NO_AP_FOUND) DEBUG_WM(DEBUG_VERBOSE,F("[EVENT] WIFI_REASON: NO_AP_FOUND"));
+      if(info.wifi_sta_disconnected.reason == WIFI_REASON_NO_AP_FOUND) DEBUG_WM(DEBUG_VERBOSE,F("[EVENT] WIFI_REASON: NO_AP_FOUND"));
       #endif
       #ifdef esp32autoreconnect
       #ifdef WM_DEBUG_LEVEL
@@ -3519,7 +3540,7 @@ void WiFiManager::WiFiEvent(WiFiEvent_t event,system_event_info_t info){
         WiFi.reconnect();
       #endif
   }
-  else if(event == SYSTEM_EVENT_SCAN_DONE){
+  else if(event == ARDUINO_EVENT_WIFI_SCAN_DONE){
     uint16_t scans = WiFi.scanComplete();
     WiFi_scanComplete(scans);
   }
@@ -3587,6 +3608,10 @@ void WiFiManager::handleUpdating(){
 	  if(_debug) Serial.setDebugOutput(true);
     uint32_t maxSketchSpace;
     
+    // Use new callback for before OTA update
+    if (_preotaupdatecallback != NULL) {
+      _preotaupdatecallback();
+    }
     #ifdef ESP8266
     		WiFiUDP::stopAll();
     		maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;

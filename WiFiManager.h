@@ -32,6 +32,7 @@
 
 #ifdef ARDUINO_ESP8266_RELEASE_2_3_0
 #warning "ARDUINO_ESP8266_RELEASE_2_3_0, some WM features disabled" 
+// @todo check failing on platform = espressif8266@1.7.3
 #define WM_NOASYNC         // esp8266 no async scan wifi
 #define WM_NOCOUNTRY       // esp8266 no country
 #define WM_NOAUTH          // no httpauth
@@ -61,6 +62,19 @@
     #define WM_WIFIOPEN   ENC_TYPE_NONE
 
 #elif defined(ESP32)
+
+    // #define STRING2(x) #x
+    // #define STRING(x) STRING2(x)    
+    // #ifdef ESP_IDF_VERSION
+    // #pragma message "ESP_IDF_VERSION_MAJOR = " STRING(ESP_IDF_VERSION_MAJOR)
+    // #pragma message "ESP_IDF_VERSION_MINOR = " STRING(ESP_IDF_VERSION_MINOR)
+    // #pragma message "ESP_IDF_VERSION_PATCH = " STRING(ESP_IDF_VERSION_PATCH)
+    // #endif
+    // #ifdef ESP_ARDUINO_VERSION
+    // #pragma message "ESP_ARDUINO_VERSION_MAJOR = " STRING(ESP_ARDUINO_VERSION_MAJOR)
+    // #pragma message "ESP_ARDUINO_VERSION_MINOR = " STRING(ESP_ARDUINO_VERSION_MINOR)
+    // #pragma message "ESP_ARDUINO_VERSION_PATCH = " STRING(ESP_ARDUINO_VERSION_PATCH)
+    // #endif
 
     #include <WiFi.h>
     #include <esp_wifi.h>  
@@ -128,7 +142,7 @@ class WiFiManagerParameter {
     const char *getPlaceholder() const; // @deprecated, use getLabel
     int         getValueLength() const;
     int         getLabelPlacement() const;
-    const char *getCustomHTML() const;
+    virtual const char *getCustomHTML() const;
     void        setValue(const char *defaultValue, int length);
 
   protected:
@@ -141,6 +155,7 @@ class WiFiManagerParameter {
     char       *_value;
     int         _length;
     int         _labelPlacement;
+  protected:
     const char *_customHTML;
     friend class WiFiManager;
 };
@@ -220,6 +235,8 @@ class WiFiManager
     //called when saving params-in-wifi or params before anything else happens (eg wifi)
     void          setPreSaveConfigCallback( std::function<void()> func );
 
+    //called just before doing OTA update
+    void          setPreOtaUpdateCallback( std::function<void()> func );
 
     //sets timeout before AP,webserver loop ends and exits even if there has been no setup.
     //useful for devices that failed to connect at some point and got stuck in a webserver loop
@@ -569,7 +586,20 @@ class WiFiManager
     bool          WiFiSetCountry();
 
     #ifdef ESP32
-    void   WiFiEvent(WiFiEvent_t event, system_event_info_t info);
+
+    // check for arduino or system event system, handle esp32 arduino v2 and IDF
+    #if defined(ESP_ARDUINO_VERSION) && defined(ESP_ARDUINO_VERSION_VAL)
+    #define WM_ARDUINOVERCHECK ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(2, 0, 0)
+    #ifdef WM_ARDUINOVERCHECK
+    #define WM_ARDUINOEVENTS
+    #endif
+    #endif
+
+    #ifdef WM_ARDUINOEVENTS
+        void   WiFiEvent(WiFiEvent_t event, arduino_event_info_t info);
+    #else
+        void   WiFiEvent(WiFiEvent_t event, system_event_info_t info);
+    #endif
     #endif
 
     // output helpers
@@ -661,6 +691,7 @@ class WiFiManager
     std::function<void()> _presavecallback;
     std::function<void()> _saveparamscallback;
     std::function<void()> _resetcallback;
+    std::function<void()> _preotaupdatecallback;
 
     template <class T>
     auto optionalIPFromString(T *obj, const char *s) -> decltype(  obj->fromString(s)  ) {
