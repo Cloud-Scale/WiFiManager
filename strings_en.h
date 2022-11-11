@@ -23,13 +23,41 @@ const char HTTP_HEAD_START[]       PROGMEM = "<!DOCTYPE html>"
 "<meta  name='viewport' content='width=device-width,initial-scale=1,user-scalable=no'/>"
 "<title>{v}</title>";
 
-const char HTTP_SCRIPT[]           PROGMEM = "<script>function c(l){"
-"document.getElementById('s').value=l.innerText||l.textContent;"
-"p = l.nextElementSibling.classList.contains('l');"
-"document.getElementById('p').disabled = !p;"
-"if(p)document.getElementById('p').focus();}</script>"; // @todo add button states, disable on click , show ack , spinner etc
+const char HTTP_SCRIPT[]           PROGMEM = "<script>"
+"function c(l) {"
+"    document.getElementById('s').value = l.innerText || l.textContent;"
+"    p = l.nextElementSibling.classList.contains('l');"
+"    document.getElementById('p').disabled = !p;"
+"    if (p) document.getElementById('p').focus();"
+"}"
+"function removeAllChildren(elm){"
+"    while(elm.lastChild){"
+"        elm.removeChild(elm.lastChild);"
+"    }"
+"}"
+"function hideLoader(){"
+"    loader = document.getElementById('loader');"
+"    loader.style.visibility = 'hidden';"
+"}"
+"function promptMass(){"
+"    caliod=document.getElementById('caliod');"
+"    removeAllChildren(caliod);"
+"    var massTxt = document.createTextNode('PLACE MASS ON SCALE NOW!');"
+"    caliod.appendChild(massTxt);"
+"}"
+"function calibratePrompt(){"
+"    loader = document.getElementById('loader');"
+"    loader.style.visibility = 'visible';"
+"    setTimeout(function(){promptMass()}, 2900);"
+"    setTimeout(function(){hideLoader()}, 3000);"
+"}"
+"function calibrateWeight(weight){"
+"    document.getElementById('calibration_mass').value=weight;"
+"    document.getElementById('calibrate_button').click();"
+"}"
+"</script>"; // @todo add button states, disable on click , show ack , spinner etc
 
-const char HTTP_HEAD_END[]         PROGMEM = "</head><body class='{c}'><div class='wrap'>"; // {c} = _bodyclass
+const char HTTP_HEAD_END[]         PROGMEM = "</head><body class='{c}'><center><div class='loader' style='visibility:hidden' id='loader'></div></center><div class='wrap'>"; // {c} = _bodyclass
 // example of embedded logo, base64 encoded inline, No styling here
 // const char HTTP_ROOT_MAIN[]        PROGMEM = "<img title=' alt=' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADQElEQVRoQ+2YjW0VQQyE7Q6gAkgFkAogFUAqgFQAVACpAKiAUAFQAaECQgWECggVGH1PPrRvn3dv9/YkFOksoUhhfzwz9ngvKrc89JbnLxuA/63gpsCmwCADWwkNEji8fVNgotDM7osI/x777x5l9F6JyB8R4eeVql4P0y8yNsjM7KGIPBORp558T04A+CwiH1UVUItiUQmZ2XMReSEiAFgjAPBeVS96D+sCYGaUx4cFbLfmhSpnqnrZuqEJgJnd8cQplVLciAgX//Cf0ToIeOB9wpmloLQAwpnVmAXgdf6pwjpJIz+XNoeZQQZlODV9vhc1Tuf6owrAk/8qIhFbJH7eI3eEzsvydQEICqBEkZwiALfF70HyHPpqScPV5HFjeFu476SkRA0AzOfy4hYwstj2ZkDgaphE7m6XqnoS7Q0BOPs/sw0kDROzjdXcCMFCNwzIy0EcRcOvBACfh4k0wgOmBX4xjfmk4DKTS31hgNWIKBCI8gdzogTgjYjQWFMw+o9LzJoZ63GUmjWm2wGDc7EvDDOj/1IVMIyD9SUAL0WEhpriRlXv5je5S+U1i2N88zdPuoVkeB+ls4SyxCoP3kVm9jsjpEsBLoOBNC5U9SwpGdakFkviuFP1keblATkTENTYcxkzgxTKOI3jyDxqLkQT87pMA++H3XvJBYtsNbBN6vuXq5S737WqHkW1VgMQNXJ0RshMqbbT33sJ5kpHWymzcJjNTeJIymJZtSQd9NHQHS1vodoFoTMkfbJzpRnLzB2vi6BZAJxWaCr+62BC+jzAxVJb3dmmiLzLwZhZNPE5e880Suo2AZgB8e8idxherqUPnT3brBDTlPxO3Z66rVwIwySXugdNd+5ejhqp/+NmgIwGX3Py3QBmlEi54KlwmjkOytQ+iJrLJj23S4GkOeecg8G091no737qvRRdzE+HLALQoMTBbJgBsCj5RSWUlUVJiZ4SOljb05eLFWgoJ5oY6yTyJp62D39jDANoKKcSocPJD5dQYzlFAFZJflUArgTPZKZwLXAnHmerfJquUkKZEgyzqOb5TuDt1P3nwxobqwPocZA11m4A1mBx5IxNgRH21ti7KbAGiyNn3HoF/gJ0w05A8xclpwAAAABJRU5ErkJggg==' /><h1>{v}</h1><h3>Beakbook Scale Registration</h3>";
 const char HTTP_ROOT_MAIN[]        PROGMEM = "<h1>{t}</h1><h3>{v}</h3>";
@@ -57,21 +85,27 @@ const char HTTP_FORM_START[]       PROGMEM = "<form method='POST' action='{v}'>"
 const char HTTP_FORM_WIFI[]        PROGMEM = "<label for='s'>SSID</label><input id='s' name='s' maxlength='32' autocorrect='off' autocapitalize='none' placeholder='{v}'><br/><label for='p'>Password</label><input id='p' name='p' maxlength='64' type='password' placeholder='{p}'>";
 const char HTTP_FORM_WIFI_END[]    PROGMEM = "";
 const char HTTP_FORM_STATIC_HEAD[] PROGMEM = "<hr><br/>";
-const char HTTP_FORM_END[]         PROGMEM = "<br/><br/><button type='submit'>Save</button></form>";
+const char HTTP_FORM_END[]         PROGMEM = "<br/><br/><button id='calibrate_button' type='submit' onclick='calibratePrompt()'>Calibrate</button></form>";
 const char HTTP_FORM_LABEL[]       PROGMEM = "<label for='{i}'>{t}</label>";
 const char HTTP_FORM_PARAM_HEAD[]  PROGMEM = "<hr><br/>";
-const char HTTP_FORM_PARAM[]       PROGMEM = "<br/><input id='{i}' name='{n}' maxlength='{l}' value='{v}' {c}>";
+const char HTTP_FORM_PARAM[]       PROGMEM = "<div class='grid-container'>"
+"  <button type='button' onclick=calibrateWeight('200')>200g</button>"
+"  <button type='button' onclick=calibrateWeight('1000')>1000g</button>"
+"  <button type='button' onclick=calibrateWeight('2000')>2000g</button>"
+"  <button type='button' onclick=calibrateWeight('5000')>5000g</button>"
+"</div>"
+"</div><br/><input id='{i}' name='{n}' maxlength='{l}' value='{v}' {c}>";
 
 const char HTTP_SCAN_LINK[]        PROGMEM = "<br/><form action='/wifi?refresh=1' method='POST'><button name='refresh' value='1'>Refresh</button></form>";
 const char HTTP_SAVED[]            PROGMEM = "<div class='msg'>Saving Credentials<br/>Trying to connect ESP to network.<br />If it fails reconnect to AP to try again</div>";
-const char HTTP_PARAMSAVED[]       PROGMEM = "<div class='msg S'><h3 style=\"text-align:center\">Calibration complete!</h3>Remove the mass from the scale.<br/> <br/><i> Once done, you can go back to the main menu and restart the scale.<i/></div>";
+const char HTTP_PARAMSAVED[]       PROGMEM = "<div class='msg S'><h3 style=\"text-align:center\">Calibration complete!</h3>Remove the mass from the scale.<br/> <br/><i> Once done, you can go back to the main menu and restart the scale. ARGHHHHH</i></div>";
 const char HTTP_END[]              PROGMEM = "</div></body></html>";
 const char HTTP_ERASEBTN[]         PROGMEM = "<br/><form action='/erase' method='get'><button class='D'>Erase WiFi Config</button></form>";
 const char HTTP_UPDATEBTN[]        PROGMEM = "<br/><form action='/update' method='get'><button>Update</button></form>";
 const char HTTP_BACKBTN[]          PROGMEM = "<hr><br/><form action='/' method='get'><button>Back</button></form>";
 
 const char HTTP_STATUS_ON[]        PROGMEM = "<div class='msg S'><strong>Connected</strong> to {v}<br/><em><small>with IP {i}</small></em></div>";
-const char HTTP_STATUS_OFF[]       PROGMEM = "<div class='msg {c}'><strong>SSID set</strong> to {v}{r}.</br>If you have connection issues, reset wifi settings in <strong>info</strong> </div>."; // {c=class} {v=ssid} {r=status_off}
+const char HTTP_STATUS_OFF[]       PROGMEM = "<div class='msg {c}'><strong>SSID set</strong> to {v}{r}.</br>If you have connection issues, reset wifi settings in <strong>info</strong> </div>"; // {c=class} {v=ssid} {r=status_off}
 const char HTTP_STATUS_OFFPW[]     PROGMEM = "<br/>Authentication Failure"; // STATION_WRONG_PASSWORD,  no eps32
 const char HTTP_STATUS_OFFNOAP[]   PROGMEM = "<br/>AP not found";   // WL_NO_SSID_AVAIL
 const char HTTP_STATUS_OFFFAIL[]   PROGMEM = "<br/>Could not Connect"; // WL_CONNECT_FAILED
@@ -81,7 +115,7 @@ const char HTTP_BR[]               PROGMEM = "<br/>";
 const char HTTP_STYLE[]            PROGMEM = "<style>"
 ".c,body{text-align:center;font-family:verdana}div,input{padding:5px;font-size:1em;margin:5px 0;box-sizing:border-box;}"
 "input,button,.msg{border-radius:.3rem;width: 100%},input[type=radio]{width: auto}"
-"button,input[type='button'],input[type='submit']{cursor:pointer;border:0;background-color:#1fa3ec;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%}"
+"button,input[type='button'],input[type='submit']{cursor:pointer;border:0;background-color:#F97916;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%}"
 "input[type='file']{border:1px solid #1fa3ec}"
 ".wrap {text-align:left;display:inline-block;min-width:260px;max-width:500px}"
 // links
@@ -105,6 +139,20 @@ const char HTTP_STYLE[]            PROGMEM = "<style>"
 "body.invert .msg{color:#fff;background-color:#282828;border-top:1px solid #555;border-right:1px solid #555;border-bottom:1px solid #555;}"
 "body.invert .q[role=img]{-webkit-filter:invert(1);filter:invert(1);}"
 "input:disabled {opacity: 0.5;}"
+// loader
+".loader {"
+"  border: 16px solid #f3f3f3; /* Light grey */"
+"  border-top: 16px solid #3498db; /* Blue */"
+"  border-radius: 50%;"
+"  width: 120px;"
+"  height: 120px;"
+"  animation: spin 2s linear infinite;"
+"}"
+"@keyframes spin {"
+"  0% { transform: rotate(0deg); }"
+"  100% { transform: rotate(360deg); }"
+"}"
+".grid-container { display: grid; grid-template-columns: auto auto; column-gap: 10px; row-gap: 10px; padding: 10px;}"
 "</style>";
 
 #ifndef WM_NOHELP
@@ -200,7 +248,7 @@ const char HTTP_INFO_host[]       PROGMEM = "<dt>Hostname</dt><dd>{1}</dd>";
 const char HTTP_INFO_stamac[]     PROGMEM = "<dt>Station MAC</dt><dd>{1}</dd>";
 const char HTTP_INFO_conx[]       PROGMEM = "<dt>Connected</dt><dd>{1}</dd>";
 const char HTTP_INFO_autoconx[]   PROGMEM = "<dt>Autoconnect</dt><dd>{1}</dd>";
-const char HTTP_INFO_calibration[] PROGMEM = "<div class='msg'><h3 style=\"text-align:center\">Instructions for scale calibration</h3>  <ol><li>Remove all weight from the scale</li><li>Enter calibration mass in grams, press enter.</li><li>Place mass on scale, wait 5 seconds.</li></ol>Your scale is calibrated! <br> This page will refresh automatically.</div>"
+const char HTTP_INFO_calibration[] PROGMEM = "<div class='msg'><h3 style=\"text-align:center\">Instructions for scale calibration</h3>  <ol id='caliod'><li>Remove all weight from the scale</li><li>Enter calibration mass in grams</li><li>Press Calibrate</li><li>Put the mass on the scale after the loading icon disappears</li></ol><br> This page will refresh automatically once it's calibrated.</div>"
 ;
 
 const char S_brand[]              PROGMEM = "Beakbook Scale Registration";
